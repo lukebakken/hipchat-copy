@@ -1,5 +1,9 @@
-hipchat-copy
+hipchat-util
 ============
+
+Utilities for working with HipChat
+
+### `copy`
 
 Copy text from a HipChat room
 
@@ -9,7 +13,7 @@ To use:
 
 ```sh
 $ echo 'YOUR_API_TOKEN' > ~/.hcapi
-$ gem install rest_client
-$ ./hccopy --help
-$ ./hccopy --room='XXX' -n 50 -d '2014-01-31'
+$ bundle install
+$ ./hcutil help copy
+$ ./hcutil copy --room='XXX' -n 50 -d '2014-01-31'
 ```

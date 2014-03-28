@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+# vim: ft=ruby
+
+$LOAD_PATH.push File.expand_path("../../lib", __FILE__)
+require 'rubygems'
+require 'bundler'
+Bundler.require
+$stdout.sync = true
+
+require 'hcutil'
+
+HCUtil::CLI.start(ARGV)

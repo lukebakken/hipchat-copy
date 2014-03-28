@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# vim: ft=ruby
+
+require 'rubygems'
+require 'hcutil'
+
+HCUtil::CLI.start(ARGV)
