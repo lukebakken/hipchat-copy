@@ -16,15 +16,14 @@ Gem::Specification.new do |s|
   s.summary     = %q{
     Utility for working with HipChat from the command line
   }
-
-  s.executables = %w{hcutil}
-  # s.rubyforge_project = 'hipchat-util'
-  s.files         = %w(LICENSE) + Dir['lib/**/*']
-  # s.test_files    = Dir['spec/**/*']
-  s.require_paths = %w(lib)
+  s.executables       = %w{hcutil}
+  s.rubyforge_project = 'hipchat-util'
+  s.files             = %w(LICENSE) + Dir['lib/**/*']
+  s.require_paths     = %w(lib)
 
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'thor', '~> 0.19'
   s.add_runtime_dependency 'rest_client', '~> 1.7'
   # s.add_development_dependency 'rr', '~> 1.0'
 end
+
