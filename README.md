@@ -7,7 +7,7 @@ Utilities for working with HipChat
 
 Copy text from a HipChat room
 
-Get your HipChat API v2 token from: https://basho.hipchat.com/account/api
+Get your HipChat API v2 token from: https://YOUR-ORG.hipchat.com/account/api
 
 To use:
 
