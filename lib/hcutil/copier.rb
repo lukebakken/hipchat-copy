@@ -1,7 +1,8 @@
 require 'json'
 require 'rest_client'
 require 'time'
-require 'uri'
+
+require 'hcutil/auth'
 
 module HCUtil
 
@@ -9,37 +10,48 @@ module HCUtil
   end
 
   class Copier
-    def initialize(options = {})
+    def initialize(room_name = 'Client Services', options = {})
+      @room_name = room_name
+      @options = options
 
-      debug = options[:debug]
-      verbose = options[:verbose] || options[:debug]
-      room_name = options[:room] || ARGV[0] || 'Client Services'
-      num_items = options[:num_items] || ARGV[1] || 25
+      @debug = @options[:debug]
+      @verbose = @options[:verbose] || @options[:debug]
+      @num_items = @options[:num_items] ||25
 
-      RestClient.log = 'stdout' if debug
-
-      @auth = Auth.new(verbose)
-
+      RestClient.log = 'stdout' if @debug
+      @auth = Auth.new(@options)
     end
 
     def copy
-      room_name_esc = URI.escape(room_name)
       room_id = 0
-      RestClient.get("https://api.hipchat.com/v2/room/#{room_name_esc}", param_arg) do |response, request, result|
-        json = JSON.parse(response.body)
-        room_id = json['id']
-        puts "Room '#{room_name}' has ID #{room_id}" if verbose
-      end
-
-      chat_date = options[:date]
-      puts "Getting history for #{chat_date.to_s}" if verbose
 
       param_arg = {
         :accept => :json,
         :params => {
-          :auth_token => auth_token,
+          :auth_token => @auth.auth_token
+        }
+      }
+      RestClient.get('https://api.hipchat.com/v2/room', param_arg) do |response, request, result|
+        json = JSON.parse(response.body)
+        items = json['items']
+        items.each do |item|
+          if item['name'] == @room_name
+            room_id = item['id']
+            $stderr.puts("Room '#{room_name}' has ID #{room_id}") if @verbose
+            break
+          end
+        end
+      end
+
+      chat_date = @options[:date]
+      $stderr.puts("Getting history for #{chat_date.to_s}") if @verbose
+
+      param_arg = {
+        :accept => :json,
+        :params => {
+          :auth_token => @auth.auth_token,
           :date => chat_date,
-          'max-results' => num_items
+          'max-results' => @num_items
         }
       }
 
@@ -48,10 +60,10 @@ module HCUtil
         json = JSON.parse(response.body)
       end
 
-      if debug
+      if @debug
         chat_json_file = "messages-#{room_id}-#{chat_date.strftime('%Y-%m-%d')}.json"
         File.open(chat_json_file, 'w') { |f| f.write(json.inspect) }
-        puts "Chat JSON saved to #{chat_json_file}"
+        $stderr.puts "Chat JSON saved to #{chat_json_file}"
       end
 
       items = json['items']
@@ -67,17 +79,6 @@ module HCUtil
         puts "#{date} #{name}: #{message}"
       end
     end
-
-    private
-
-    def param_arg
-      param_arg = {
-        :accept => :json,
-        :params => {
-          :auth_token => @auth.auth_token
-        }
-      }
-    end
-
   end
 end
+

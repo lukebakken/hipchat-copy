@@ -3,6 +3,7 @@
 
 require 'thor'
 require 'hcutil/version'
+require 'hcutil/copier'
 
 module HCUtil
   class CLI < Thor
@@ -27,7 +28,7 @@ module HCUtil
       puts("version: #{HCUtil::VERSION}")
     end
 
-    desc('copy ROOM', 'copy chat messages from ROOM')
+    desc('copy ROOM_NAME', 'copy chat messages from ROOM_NAME')
     option(:date,
            :desc => 'Date from which to copy messages',
            :type => :string,
@@ -38,8 +39,9 @@ module HCUtil
            :aliases => '-n',
            :type => :numeric,
            :default => 25)
-    def copy(room)
-      puts("COPYING FROM #{room}")
+    def copy(room_name)
+      copier = HCUtil::Copier.new(room_name, options)
+      copier.copy()
     end
   end
 end
