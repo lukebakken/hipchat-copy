@@ -10,7 +10,8 @@ module HCUtil
     attr_reader :auth_token
 
     def initialize(options = {})
-      if ENV['HOME'].nil? or ENV['HOME'] == '' or not Dir.exist?(ENV['HOME'])
+      home_env = ENV['HOME']
+      if home_env.nil_or_empty? or not Dir.exist?(ENV['HOME'])
         raise(AuthError, 'HOME env var not set or dir does not exist')
       end
 
