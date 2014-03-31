@@ -7,6 +7,9 @@ require 'hcutil/auth'
 module HCUtil
 
   class CopierError < StandardError
+    def initialize(msg = 'CopierError')
+      super
+    end
   end
 
   class Copier
@@ -32,14 +35,18 @@ module HCUtil
         }
       }
       RestClient.get('https://api.hipchat.com/v2/room', param_arg) do |response, request, result|
-        json = JSON.parse(response.body)
-        items = json['items']
-        items.each do |item|
-          if item['name'] == @room_name
-            room_id = item['id']
-            $stderr.puts("Room '#{room_name}' has ID #{room_id}") if @verbose
-            break
+        if result.is_a? Net::HTTPSuccess
+          json = JSON.parse(response.body)
+          items = json['items']
+          items.each do |item|
+            if item['name'] == @room_name
+              room_id = item['id']
+              $stderr.puts("Room '#{@room_name}' has ID #{room_id}") if @verbose
+              break
+            end
           end
+        else
+          raise(CopierError, "REST error: #{result}|#{response}")
         end
       end
 
@@ -57,7 +64,11 @@ module HCUtil
 
       json = nil
       RestClient.get("https://api.hipchat.com/v2/room/#{room_id}/history", param_arg) do |response, request, result|
-        json = JSON.parse(response.body)
+        if result.is_a? Net::HTTPSuccess
+          json = JSON.parse(response.body)
+        else
+          raise(CopierError, "REST error: #{result}|#{response}")
+        end
       end
 
       if @debug

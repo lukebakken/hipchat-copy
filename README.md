@@ -15,5 +15,6 @@ To use:
 $ echo 'YOUR_API_TOKEN' > ~/.hcapi
 $ bundle install
 $ ./hcutil help copy
-$ ./hcutil copy --room='XXX' -n 50 -d '2014-01-31'
+$ ./hcutil copy 'Target HipChat Room'
+$ ./hcutil copy 'Target HipChat Room' -n 50 -d '2014-01-31'
 ```

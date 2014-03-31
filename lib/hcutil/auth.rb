@@ -1,7 +1,7 @@
 module HCUtil
   class AuthError < StandardError
-    def initialize(data)
-      @data = data
+    def initialize(msg = 'AuthError')
+      super
     end
   end
 
@@ -10,10 +10,8 @@ module HCUtil
     attr_reader :auth_token
 
     def initialize(options = {})
-      if ENV['HOME'].nil? or
-         ENV['HOME'] == '' or
-         (not Dir.exist?(ENV['HOME']))
-        raise AuthError.new('[error]: HOME env var not set or dir does not exist')
+      if ENV['HOME'].nil? or ENV['HOME'] == '' or not Dir.exist?(ENV['HOME'])
+        raise(AuthError, 'HOME env var not set or dir does not exist')
       end
 
       auth_file = File.join(ENV['HOME'], '.hcapi')
@@ -21,7 +19,7 @@ module HCUtil
         @auth_token = File.read(auth_file).gsub("\n", ' ').squeeze(' ')
         $stderr.puts("Auth token: #{auth_token}") if options[:verbose]
       else
-        raise AuthError.new('[error]: missing auth token file ~/.hcapi')
+        raise(AuthError, 'missing auth token file ~/.hcapi')
       end
     end
   end

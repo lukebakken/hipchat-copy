@@ -33,15 +33,19 @@ module HCUtil
            :desc => 'Date from which to copy messages',
            :type => :string,
            :aliases => '-d',
-           :default => Time.now.to_s)
+           :default => Time.now)
     option(:num_items,
            :desc => 'Number of chat messages to copy',
            :aliases => '-n',
            :type => :numeric,
            :default => 25)
     def copy(room_name)
+      begin
       copier = HCUtil::Copier.new(room_name, options)
       copier.copy()
+      rescue AuthError, CopierError => e
+        $stderr.puts("[error] #{e.message}")
+      end
     end
   end
 end
