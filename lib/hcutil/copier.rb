@@ -1,8 +1,4 @@
-require 'json'
-require 'rest_client'
-require 'time'
-
-require 'hcutil/auth'
+require 'hcutil/op_base'
 
 module HCUtil
 
@@ -12,17 +8,11 @@ module HCUtil
     end
   end
 
-  class Copier
+  class Copier < OpBase
     def initialize(room_name = 'Client Services', options = {})
+      super(options)
       @room_name = room_name
-      @options = options
-
-      @debug = @options[:debug]
-      @verbose = @options[:verbose] || @options[:debug]
       @num_items = @options[:num_items] ||25
-
-      RestClient.log = 'stdout' if @debug
-      @auth = Auth.new(@options)
     end
 
     def copy
