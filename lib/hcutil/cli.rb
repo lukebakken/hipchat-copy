@@ -3,8 +3,9 @@
 
 require 'thor'
 require 'hcutil/version'
+require 'hcutil/errors'
 require 'hcutil/copier'
-require 'hcutil/pinger'
+require 'hcutil/paster'
 
 module HCUtil
   class CLI < Thor
@@ -24,11 +25,6 @@ module HCUtil
     end
 
     desc('copy ROOM_NAME', 'copy chat messages from ROOM_NAME')
-    option(:room,
-           :desc => 'HipChat room with which to work',
-           :aliases => '-r',
-           :type => :string,
-           :default => 'Client Services')
     option(:date,
            :desc => 'Date from which to copy messages',
            :type => :string,
@@ -43,17 +39,30 @@ module HCUtil
       begin
         copier = HCUtil::Copier.new(room_name, options)
         copier.copy()
-      rescue AuthError, CopierError => e
+      rescue Errors::HCUtilError => e
         $stderr.puts("[error] #{e.message}")
       end
     end
 
-    desc('ping TICKET_NUM RESPONSE_FILE SUMMARY', 'Ping Client Services HipChat room for ticket TICKET_NUM with text from RESPONSE_FILE. SUMMARY is optional.')
-    def ping(ticket_num, response_file, summary=nil)
+    desc('paste FILE', 'Paste from file (- for stdin) into HipChat room')
+    option(:room,
+           :desc => 'HipChat room name or number into which to paste data',
+           :type => :string,
+           :aliases => '-r',
+           :default => 61640)
+    option(:ticket,
+           :desc => 'Ticket number, optional. If present will create message header',
+           :type => :numeric,
+           :aliases => '-t')
+    option(:summary,
+           :desc => 'Summary, optional. If present will create message header',
+           :type => :string,
+           :aliases => '-s')
+    def paste(file)
       begin
-        pinger = HCUtil::Pinger.new(ticket_num, response_file, summary, options)
-        pinger.ping()
-      rescue AuthError, PingerError => e
+        paster = HCUtil::Paster.new(file, options)
+        paster.paste()
+      rescue Errors::HCUtilError => e
         $stderr.puts("[error] #{e.message}")
       end
     end

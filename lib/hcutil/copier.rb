@@ -1,12 +1,7 @@
+require 'hcutil/errors'
 require 'hcutil/op_base'
 
 module HCUtil
-
-  class CopierError < StandardError
-    def initialize(msg = 'CopierError')
-      super
-    end
-  end
 
   class Copier < OpBase
     def initialize(room_name = 'Client Services', options = {})
@@ -24,7 +19,8 @@ module HCUtil
           :auth_token => @auth.auth_token
         }
       }
-      RestClient.get('https://api.hipchat.com/v2/room', param_arg) do |response, request, result|
+      uri = 'https://api.hipchat.com/v2/room'
+      RestClient.get(uri, param_arg) do |response, request, result|
         if result.is_a? Net::HTTPSuccess
           json = JSON.parse(response.body)
           items = json['items']
@@ -36,8 +32,12 @@ module HCUtil
             end
           end
         else
-          raise(CopierError, "REST error: #{result}|#{response}")
+          raise(Errors::RESTError.new(result, uri, response))
         end
+      end
+
+      if room_id == 0
+        raise(Errors::CopierError, "Room with name '#{@room_name}' could not be found")
       end
 
       chat_date = @options[:date]
@@ -52,12 +52,13 @@ module HCUtil
         }
       }
 
+      uri = "https://api.hipchat.com/v2/room/#{room_id}/history"
       json = nil
-      RestClient.get("https://api.hipchat.com/v2/room/#{room_id}/history", param_arg) do |response, request, result|
+      RestClient.get(uri, param_arg) do |response, request, result|
         if result.is_a? Net::HTTPSuccess
           json = JSON.parse(response.body)
         else
-          raise(CopierError, "REST error: #{result}|#{response}")
+          raise(Errors::RESTError.new(result, uri, response))
         end
       end
 
