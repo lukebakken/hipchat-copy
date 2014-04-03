@@ -11,19 +11,15 @@ Gem::Specification.new do |s|
   s.name        = 'hcutil'
   s.version     = HCUtil::VERSION.dup
   s.authors     = ['Luke Bakken']
+  s.licenses    = ['Unlicense','Public Domain']
   s.email       = %w(luke@bowbak.org)
   s.homepage    = 'http://github.com/lukebakken/hipchat-util'
-  s.summary     = %q{
-    Utility for working with HipChat from the command line
-  }
+  s.summary = s.description = %q{ Utility for working with HipChat from the command line }
   s.executables       = %w{hcutil}
   s.rubyforge_project = 'hipchat-util'
   s.files             = %w(LICENSE) + Dir['lib/**/*']
   s.require_paths     = %w(lib)
-
-  s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'thor', '~> 0.19'
   s.add_runtime_dependency 'rest_client', '~> 1.7'
-  # s.add_development_dependency 'rr', '~> 1.0'
 end
 

@@ -44,7 +44,7 @@ module HCUtil
       end
     end
 
-    desc('paste FILE', 'Paste from file (- for stdin) into HipChat room')
+    desc('paste THING', 'Paste from thing (- for stdin, a file if it is a valid filename, or literal string otherwise) into HipChat room')
     option(:room,
            :desc => 'HipChat room name or number into which to paste data',
            :type => :string,
@@ -58,9 +58,9 @@ module HCUtil
            :desc => 'Summary, optional. If present will create message header',
            :type => :string,
            :aliases => '-s')
-    def paste(file)
+    def paste(thing)
       begin
-        paster = HCUtil::Paster.new(file, options)
+        paster = HCUtil::Paster.new(thing, options)
         paster.paste()
       rescue Errors::HCUtilError => e
         $stderr.puts("[error] #{e.message}")

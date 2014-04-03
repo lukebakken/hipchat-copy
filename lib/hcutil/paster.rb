@@ -5,23 +5,21 @@ require 'hcutil/op_base'
 module HCUtil
 
   class Paster < OpBase
-    def initialize(file, options = {})
+    def initialize(thing, options = {})
       super(options)
-      if file == '-' or File.exists?(file)
-        @file = file
-      else
-        raise(Errors::PasterError, "Response file '#{file}' does not exist")
-      end
+      @thing = thing
       @room = options[:room]
       @ticket = options[:ticket]
       @summary = options[:summary]
     end
 
     def paste
-      if @file == '-'
-        file_contents = $stdin.read
+      if @thing == '-'
+        thing_contents = $stdin.read
+      elsif File.exists?(@thing)
+        thing_contents = File.read(@thing)
       else
-        file_contents = File.read(@file)
+        thing_contents = @thing
       end
 
       if @ticket
@@ -32,7 +30,7 @@ module HCUtil
       end
       message = <<"EOT"
 #{paste_header}
-#{file_contents}
+#{thing_contents}
 EOT
       post_data = {
         :message_format => 'text',
