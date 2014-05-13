@@ -1,5 +1,7 @@
 require 'hcutil/errors'
 require 'hcutil/op_base'
+require 'uri'
+require 'cgi'
 
 module HCUtil
 
@@ -10,32 +12,77 @@ module HCUtil
       @num_items = @options[:num_items] ||25
     end
 
-    def copy
-      room_id = 0
+    def get_room_id(start_index=0)
+
+      uri = 'https://api.hipchat.com/v2/room'
+
+      # First, try to get the room directly by name
+      if start_index == 0
+        param_arg = {
+          :accept => :json,
+          :params => {
+            'auth_token' => @auth.auth_token
+          }
+        }
+        uri_direct = uri + URI.escape("/#{@room_name}")
+        RestClient.get(uri_direct, param_arg) do |response, request, result|
+          if result.is_a? Net::HTTPSuccess
+            json = JSON.parse(response.body)
+            if json['id']
+              room_id = json['id']
+              $stderr.puts("Room '#{@room_name}' has ID #{room_id}") if @verbose
+              return room_id
+            end
+          end
+        end
+      end
 
       param_arg = {
         :accept => :json,
         :params => {
-          :auth_token => @auth.auth_token
+          'auth_token' => @auth.auth_token,
+          'start-index' => start_index,
+          'max-results' => 100
         }
       }
-      uri = 'https://api.hipchat.com/v2/room'
+
+      room_id = 0
+
       RestClient.get(uri, param_arg) do |response, request, result|
         if result.is_a? Net::HTTPSuccess
           json = JSON.parse(response.body)
-          items = json['items']
-          items.each do |item|
-            if item['name'] == @room_name
-              room_id = item['id']
-              $stderr.puts("Room '#{@room_name}' has ID #{room_id}") if @verbose
-              break
+          if json['items']
+            items = json['items']
+            items.each do |item|
+              if item['name'] == @room_name
+                room_id = item['id']
+                $stderr.puts("Room '#{@room_name}' has ID #{room_id}") if @verbose
+                break
+              end
             end
+            links = json['links']
+            if room_id == 0 and not links.nil?
+              next_uri = links['next']
+              unless next_uri.nil_or_empty?
+                query = URI.parse(next_uri).query
+                query_params = CGI.parse(query)
+                start_index = query_params['start-index'].first
+                $stderr.puts("finding '#{@room_name}' with start_index #{start_index}") if @verbose
+                return get_room_id(start_index)
+              end
+            end
+          else
+            raise(Errors::CopierError, "Room with name '#{@room_name}' could not be found - could not parse JSON")
           end
         else
           raise(Errors::RESTError.new(result, uri, response))
         end
       end
+      return room_id
+    end
 
+    def copy
+      room_id = get_room_id
       if room_id == 0
         raise(Errors::CopierError, "Room with name '#{@room_name}' could not be found")
       end
