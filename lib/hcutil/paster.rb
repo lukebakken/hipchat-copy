@@ -46,11 +46,7 @@ EOT
 
       room_esc = URI.escape(@room.to_s)
       uri = "https://api.hipchat.com/v2/room/#{room_esc}/notification"
-      RestClient.post(uri, post_data.to_json, header_args) do |response, request, result|
-        unless result.is_a? Net::HTTPSuccess
-          raise(Errors::RESTError.new(result, uri, response))
-        end
-      end
+      post_request(uri, post_data.to_json, header_args)
     end
   end
 end

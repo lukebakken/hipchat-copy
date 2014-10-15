@@ -25,7 +25,7 @@ module HCUtil
           }
         }
         uri_direct = uri + URI.escape("/#{@room_name}")
-        RestClient.get(uri_direct, param_arg) do |response, request, result|
+        get_request(uri_direct, param_arg) do |response, request, result|
           if result.is_a? Net::HTTPSuccess
             json = JSON.parse(response.body)
             if json['id']
@@ -48,7 +48,7 @@ module HCUtil
 
       room_id = 0
 
-      RestClient.get(uri, param_arg) do |response, request, result|
+      get_request(uri, param_arg) do |response, request, result|
         if result.is_a? Net::HTTPSuccess
           json = JSON.parse(response.body)
           if json['items']
@@ -101,7 +101,7 @@ module HCUtil
 
       uri = "https://api.hipchat.com/v2/room/#{room_id}/history"
       json = nil
-      RestClient.get(uri, param_arg) do |response, request, result|
+      get_request(uri, param_arg) do |response, request, result|
         if result.is_a? Net::HTTPSuccess
           json = JSON.parse(response.body)
         else
